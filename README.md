@@ -19,8 +19,31 @@ A curated library of reusable "skills" for coding agents. Each skill bundles gui
 OpenCode loads skills from `~/.config/opencode/skill`. Use the one-liner below to download curated and experimental skills into that folder:
 
 ```bash
-bash -c 'set -e; repo="https://github.com/The-Smol-Lab/skills.git"; out="$HOME/.config/opencode/skill"; tmp="$(mktemp -d)"; git clone --depth 1 --filter=blob:none --sparse "$repo" "$tmp"; git -C "$tmp" sparse-checkout set skills/curated/ai-development skills/curated/software-engineering skills/curated/utilities skills/experimental; mkdir -p "$out"; rsync -a "$tmp/skills/curated/ai-development/" "$out/"; rsync -a "$tmp/skills/curated/software-engineering/" "$out/"; rsync -a "$tmp/skills/curated/utilities/" "$out/"; rsync -a "$tmp/skills/experimental/" "$out/"; rm -rf "$tmp"; echo "Merged into $out"'
+bash -c '
+  set -e
+  repo="https://github.com/The-Smol-Lab/skills.git"
+  out="$HOME/.config/opencode/skill"
+  tmp="$(mktemp -d)"
+
+  git clone --depth 1 --filter=blob:none --sparse "$repo" "$tmp"
+  git -C "$tmp" sparse-checkout set \
+    skills/curated/ai-development \
+    skills/curated/software-engineering \
+    skills/curated/utilities \
+    skills/experimental
+
+  mkdir -p "$out"
+  rsync -a "$tmp/skills/curated/ai-development/" "$out/"
+  rsync -a "$tmp/skills/curated/software-engineering/" "$out/"
+  rsync -a "$tmp/skills/curated/utilities/" "$out/"
+  rsync -a "$tmp/skills/experimental/" "$out/"
+
+  rm -rf "$tmp"
+  echo "Merged into $out"
+'
 ```
+
+To add more sources, repeat the same pattern with a different `repo` URL and `sparse-checkout` paths, keeping the same `out` folder so everything merges into `~/.config/opencode/skill`.
 
 MCP-specific setup has been moved to `config_examples/claude-skills-mcp.md`, with configs under `config_examples/claude-skills-mcp/`.
 
