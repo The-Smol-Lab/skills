@@ -76,6 +76,10 @@ See opencode doc here for mcp official mcp config: [https://opencode.ai/docs/mcp
 
 5. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill. Follow it step by step.”).
 
+## More skill sources
+- [SkillsMP](https://skillsmp.com/) — A community-run marketplace that indexes tens of thousands of GitHub-hosted skills using the open `SKILL.md` standard, with search and category browsing to discover and download skills.
+- [Claude Plugins Skill Registry](https://claude-plugins.dev/skills) — A community-maintained, open-source registry that auto-indexes public GitHub skills and lets you browse and install them for Claude, Codex, OpenCode, and other assistants.
+
 ## Contributing
 - Add new skills under the appropriate category.
 - Keep skills self-contained and focused on a single domain or workflow.
