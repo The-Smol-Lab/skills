@@ -1,21 +1,28 @@
 # Skills Catalog
+
 A curated library of reusable "skills" for coding agents. Each skill bundles guidance, references, and optionally scripts so agents can execute domain-specific tasks consistently.
 
-## What’s in this repo
-- Curated skills organized by domain under `skills/curated/`
-- Experimental skills under `skills/experimental/`
+## What's in this repo
+
+- **Curated skills** organized by domain under `skills/curated/`
+- **Experimental skills** under `skills/experimental/`
 - Each skill includes a `SKILL.md` plus optional `references/`, `scripts/`, and `templates/`
 
 ## How to use
-1. Pick a skill that matches your task.
-2. Read the skill’s `SKILL.md` for scope and usage.
-3. Use any referenced docs or scripts to complete the task.
+
+1. Pick a skill that matches your task
+2. Read the skill's `SKILL.md` for scope and usage
+3. Use any referenced docs or scripts to complete the task
 
 ## Using with OpenCode (MCP)
+
 OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https://github.com/K-Dense-AI/claude-skills-mcp) server, which provides semantic search and progressive disclosure for skills.
 
-1. Clone this repo somewhere on your machine.
-2. Add an MCP server to your OpenCode config (`~/.config/opencode/opencode.json` or a per-project `opencode.json`):
+### Setup Instructions
+
+1. **Clone this repository** somewhere on your machine
+
+2. **Add the MCP server** to your OpenCode config (`~/.config/opencode/opencode.json` or a per-project `opencode.json`):
 
 ```jsonc
 {
@@ -27,9 +34,15 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
   }
 }
 ```
-See opencode doc here for mcp official mcp config: [https://opencode.ai/docs/mcp-servers/](https://opencode.ai/docs/mcp-servers/)
 
-3. Generate a starter config here `~/.claude/skills/config.json` and copy the content below (also available at https://github.com/The-Smol-Lab/skills/tree/main/config_examples). For a heavier setup that loads 100+ skills at once, see `config_examples/config_extreme.json`—the claude-skills-mcp server still uses semantic search to select the right skills on demand. For a walkthrough on creating a GitHub token, see https://docs.catalyst.zoho.com/en/tutorials/githubbot/java/generate-personal-access-token/. For public repos, a classic PAT with read-only access is sufficient.
+   See the [official OpenCode MCP documentation](https://opencode.ai/docs/mcp-servers/) for more details.
+
+3. **Create the skills config** at `~/.claude/skills/config.json` and copy the content below:
+
+   - A starter config is available at [`config_examples/config.json`](config_examples/config.json)
+   - For a heavier setup loading 100+ skills, see [`config_examples/config_extreme.json`](config_examples/config_extreme.json)
+   - For creating a GitHub token, see [this guide](https://docs.catalyst.zoho.com/en/tutorials/githubbot/java/generate-personal-access-token/)
+   - For public repos, a classic PAT with read-only access is sufficient
 
 ```jsonc
 {
@@ -74,16 +87,23 @@ See opencode doc here for mcp official mcp config: [https://opencode.ai/docs/mcp
 }
 ```
 
-5. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill. Follow it step by step.”).
+4. **Restart OpenCode** and use skills in your prompts
+
+   Example: _"Use the `skill-creator` skill. Follow it step by step."_
 
 ## More skill sources
-- [SkillsMP](https://skillsmp.com/) — A community-run marketplace that indexes tens of thousands of GitHub-hosted skills using the open `SKILL.md` standard, with search and category browsing to discover and download skills.
-- [Claude Plugins Skill Registry](https://claude-plugins.dev/skills) — A community-maintained, open-source registry that auto-indexes public GitHub skills and lets you browse and install them for Claude, Codex, OpenCode, and other assistants.
+
+| Source | Description |
+|--------|-------------|
+| [SkillsMP](https://skillsmp.com/) | A community-run marketplace that indexes tens of thousands of GitHub-hosted skills using the open `SKILL.md` standard, with search and category browsing to discover and download skills |
+| [Claude Plugins Skill Registry](https://claude-plugins.dev/skills) | A community-maintained, open-source registry that auto-indexes public GitHub skills and lets you browse and install them for Claude, Codex, OpenCode, and other assistants |
 
 ## Contributing
-- Add new skills under the appropriate category.
-- Keep skills self-contained and focused on a single domain or workflow.
-- Prefer links to authoritative references and include runnable scripts where helpful.
+
+- Add new skills under the appropriate category
+- Keep skills self-contained and focused on a single domain or workflow
+- Prefer links to authoritative references and include runnable scripts where helpful
 
 ## License
-MIT — see [LICENSE](LICENSE).
+
+MIT — see [LICENSE](LICENSE)
