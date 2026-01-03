@@ -2,6 +2,41 @@
 
 Detailed implementation patterns and code examples for building ChatGPT Apps.
 
+## Sunpeak Utilities
+
+### Responsive Layout Hooks
+
+```typescript
+import { useMaxHeight, useSafeArea } from 'sunpeak';
+
+export function MyWidget() {
+  const maxHeight = useMaxHeight();
+  const safeArea = useSafeArea();
+
+  return (
+    <div
+      style={{
+        maxHeight: maxHeight ?? undefined,
+        paddingTop: (safeArea?.insets?.top ?? 0) + 24,
+        paddingBottom: (safeArea?.insets?.bottom ?? 0) + 24,
+      }}
+    >
+      {/* content */}
+    </div>
+  );
+}
+```
+
+### When to Use Sunpeak vs Custom Hooks
+
+| Hook | Sunpeak | Custom (this skill) | Use When |
+|:-----|:--------|:--------------------|:---------|
+| Widget state | `useWidgetState` | `useWidgetState` (polling) | Custom for interactive widgets. |
+| Tool output | `useWidgetGlobal('toolOutput')` | `useToolOutput` (polling) | Custom for dynamic updates. |
+| Safe area | `useSafeArea` | - | Always use Sunpeak. |
+| Max height | `useMaxHeight` | - | Always use Sunpeak. |
+| Call tools | `useWidgetAPI().callTool` | `useToolCall` | Either works. |
+
 ## MCP Server Implementation
 
 ### Complete Server Template (TypeScript)
@@ -205,65 +240,185 @@ async function setState<T>(key: string, state: T): Promise<void> {
 }
 ```
 
+### Fallback Client Key Discovery (Server-Side)
+
+When Streamable HTTP requests arrive without a clientKey, find the most recently active state.
+
+```typescript
+async function findFallbackClientKey(): Promise<string> {
+  if (redis) {
+    const keys = await redis.zRange(`${PREFIX}:active`, -1, -1);
+    for (const key of keys.reverse()) {
+      const state = await getState(key);
+      if (state && state.items?.length > 0) return key;
+    }
+  }
+
+  let newest = { key: 'default', time: 0 };
+  for (const [key, state] of stateByClient.entries()) {
+    if (state.items?.length > 0 && state.lastSeen > newest.time) {
+      newest = { key, time: state.lastSeen };
+    }
+  }
+
+  return newest.key;
+}
+```
+
 ## Widget Implementation
 
 ### React Widget with Hooks
 
 ```typescript
 // src/lib/openai-hooks.ts
-import { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, type SetStateAction } from 'react';
 
-type SetGlobalsEvent = CustomEvent<{ globals: Partial<Window['openai']> }>;
+const LOCAL_UPDATE_GRACE_PERIOD_MS = 2000;
+const POLL_INTERVAL_MS = 500;
 
-export function useOpenAiGlobal<K extends keyof NonNullable<Window['openai']>>(
-  key: K
-): NonNullable<Window['openai']>[K] | undefined {
-  return useSyncExternalStore(
-    (onChange) => {
-      const handler = (e: SetGlobalsEvent) => {
-        if (e.detail.globals[key] !== undefined) onChange();
-      };
-      window.addEventListener('openai:set_globals', handler as EventListener);
-      return () => window.removeEventListener('openai:set_globals', handler as EventListener);
-    },
-    () => window.openai?.[key]
-  );
+export function readOpenAiWidgetState<T>(): T | null {
+  if (typeof window === 'undefined') return null;
+
+  const state = window.openai?.widgetState;
+  if (!state || typeof state !== 'object') return null;
+
+  return state as T;
 }
 
+/**
+ * Tool output hook with polling.
+ * Use this for interactive widgets. For read-only widgets, Sunpeak's
+ * useWidgetGlobal('toolOutput') is simpler.
+ */
 export function useToolOutput<T>(): T | null {
-  return useOpenAiGlobal('toolOutput') as T | null;
-}
-
-export function useWidgetState<T>(
-  initial: T | (() => T)
-): readonly [T, (next: T | ((prev: T) => T)) => void] {
-  const external = useOpenAiGlobal('widgetState') as T | undefined;
-  
-  const [state, _setState] = useState<T>(() => 
-    external ?? (typeof initial === 'function' ? (initial as () => T)() : initial)
-  );
+  const [toolOutput, setToolOutput] = useState<T | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return (window.openai?.toolOutput as T) ?? null;
+  });
 
   useEffect(() => {
-    if (external !== undefined) _setState(external);
-  }, [external]);
+    if (typeof window === 'undefined') return;
 
-  const setState = useCallback((next: T | ((prev: T) => T)) => {
-    _setState(prev => {
-      const value = typeof next === 'function' ? (next as (p: T) => T)(prev) : next;
-      window.openai?.setWidgetState?.(value as Record<string, unknown>);
-      return value;
+    const interval = setInterval(() => {
+      const currentOutput = (window.openai?.toolOutput as T) ?? null;
+      if (JSON.stringify(currentOutput) !== JSON.stringify(toolOutput)) {
+        setToolOutput(currentOutput);
+      }
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [toolOutput]);
+
+  return toolOutput;
+}
+
+/**
+ * Widget state hook with polling and a grace period.
+ * Use this for interactive widgets to prevent race conditions.
+ */
+export function useWidgetState<T extends Record<string, unknown>>(
+  initialState: T | (() => T)
+): [T, (state: SetStateAction<T>) => void] {
+  const [state, setState] = useState<T>(() =>
+    typeof initialState === 'function'
+      ? (initialState as () => T)()
+      : initialState
+  );
+
+  const lastLocalUpdateRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const interval = setInterval(() => {
+      const timeSinceLocalUpdate = Date.now() - lastLocalUpdateRef.current;
+      if (timeSinceLocalUpdate < LOCAL_UPDATE_GRACE_PERIOD_MS) {
+        return;
+      }
+
+      const externalState = window.openai?.widgetState as T | undefined;
+      if (externalState && JSON.stringify(externalState) !== JSON.stringify(state)) {
+        setState(externalState);
+      }
+    }, POLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [state]);
+
+  const setWidgetState = useCallback((nextState: SetStateAction<T>) => {
+    lastLocalUpdateRef.current = Date.now();
+
+    setState((prevState) => {
+      const resolved = typeof nextState === 'function'
+        ? (nextState as (prev: T) => T)(prevState)
+        : nextState;
+
+      if (typeof window !== 'undefined' && window.openai?.setWidgetState) {
+        window.openai.setWidgetState(resolved);
+      }
+
+      return resolved;
     });
   }, []);
 
-  return [state, setState] as const;
+  return [state, setWidgetState];
 }
 
 export function useToolCall() {
-  return useCallback(
-    (name: string, args: Record<string, unknown>) => 
-      window.openai?.callTool?.(name, args),
-    []
-  );
+  return useCallback(async (name: string, args: Record<string, unknown>) => {
+    if (typeof window === 'undefined' || !window.openai?.callTool) {
+      return null;
+    }
+
+    return window.openai.callTool(name, args);
+  }, []);
+}
+```
+
+## localStorage Fallback Pattern
+
+Use localStorage when widget state must persist across page reloads.
+
+```typescript
+function extractConversationId(value: string | null): string | null {
+  if (!value) return null;
+  const match = value.match(/\/c\/([a-zA-Z0-9-]+)/);
+  return match?.[1] ?? null;
+}
+
+function getStorageKeys() {
+  const conversationId = extractConversationId(document.referrer)
+    ?? extractConversationId(window.location.href);
+  const suffix = conversationId ? `:${conversationId}` : '';
+
+  return {
+    clientKey: `app-client-key${suffix}`,
+    state: `app-state${suffix}`,
+  };
+}
+
+function initializeState<T>(defaultState: T): T {
+  const widgetState = window.openai?.widgetState as T | undefined;
+  if (widgetState) return widgetState;
+
+  const keys = getStorageKeys();
+  const cached = localStorage.getItem(keys.state);
+  if (cached) {
+    try {
+      return JSON.parse(cached) as T;
+    } catch {
+      return defaultState;
+    }
+  }
+
+  return defaultState;
+}
+
+function persistState<T>(state: T) {
+  window.openai?.setWidgetState?.(state as Record<string, unknown>);
+
+  const keys = getStorageKeys();
+  localStorage.setItem(keys.state, JSON.stringify(state));
 }
 ```
 
@@ -320,6 +475,122 @@ export const YourResource = forwardRef<HTMLDivElement>((_, ref) => {
 });
 ```
 
+## Tool Aliases Pattern
+
+Accept plural or singular variations for better LLM compatibility.
+
+```typescript
+server.setRequestHandler(CallToolRequestSchema, async (req) => {
+  const { name, arguments: args } = req.params;
+
+  switch (name) {
+    case 'add-option':
+    case 'add-options': {
+      const items = Array.isArray(args.items) ? args.items : [args.item];
+      state.items = [...state.items, ...items];
+      break;
+    }
+    case 'remove-option':
+    case 'remove-options': {
+      const targets = Array.isArray(args.items) ? args.items : [args.item];
+      state.items = state.items.filter((item) =>
+        !targets.some((target) => target.toLowerCase() === item.toLowerCase())
+      );
+      break;
+    }
+    case 'get-option':
+    case 'get-options': {
+      // Read-only
+      break;
+    }
+    default:
+      break;
+  }
+});
+```
+
+## Removal Matching Algorithm
+
+Use two-tier matching to handle case and whitespace differences.
+
+```typescript
+function normalizeMatchKey(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function normalizeLooseKey(value: string) {
+  return value.replace(/\s+/g, '').toLowerCase();
+}
+
+function removeItems(items: string[], targets: string[]): string[] {
+  const strictTargets = new Set(targets.map(normalizeMatchKey));
+  const looseTargets = new Set(targets.map(normalizeLooseKey));
+
+  return items.filter((item) => {
+    const strictKey = normalizeMatchKey(item);
+    const looseKey = normalizeLooseKey(item);
+    return !strictTargets.has(strictKey) && !looseTargets.has(looseKey);
+  });
+}
+```
+
+## UI Component Patterns
+
+### Button with Loading State
+
+```typescript
+function ActionButton({ onClick, children }: { onClick: () => Promise<void>; children: React.ReactNode }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      await onClick();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={isLoading}
+      style={{ opacity: isLoading ? 0.6 : 1 }}
+    >
+      {isLoading ? 'Loading...' : children}
+    </button>
+  );
+}
+```
+
+### Input with Widget Styling
+
+```typescript
+<input
+  type="text"
+  value={value}
+  onChange={(e) => setValue(e.target.value)}
+  style={{
+    background: 'var(--widget-input-bg, #f5f5f5)',
+    border: '1px solid var(--widget-border, #e0e0e0)',
+    borderRadius: '8px',
+    padding: '8px 12px',
+    color: 'var(--widget-text, #333)',
+  }}
+/>
+```
+
+### Fullscreen-Aware Containers
+
+```typescript
+const containerRef = useRef<HTMLDivElement>(null);
+const isFullscreen = !!document.fullscreenElement;
+const effectContainer = isFullscreen ? containerRef.current : null;
+
+triggerConfetti({ container: effectContainer });
+```
+
 ### Resource Metadata
 
 ```json
@@ -373,6 +644,25 @@ export const yourSimulation = {
     _meta: {},
   },
 };
+```
+
+## Error Handling Patterns
+
+### Tool Call Failures
+
+```typescript
+return {
+  content: [{ type: 'text', text: 'Failed to update options', isError: true }],
+  structuredContent: { items: state.items, title: state.title },
+};
+```
+
+### Widget Error Display
+
+```typescript
+if (error) {
+  return <div role="alert">{error}</div>;
+}
 ```
 
 ## Deployment
@@ -484,3 +774,11 @@ echo "Deployed: ${URL}/mcp"
    - Enable developer mode in Settings > Apps & Connectors > Advanced
    - Create connector with ngrok URL (`https://xxx.ngrok.app/mcp`)
    - Add connector to conversation via More menu
+
+---
+
+## Future Consideration
+
+The production patterns in this skill (grace period sync, localStorage fallback, client key discovery) could be contributed back to Sunpeak as optional utilities for complex interactive widgets. Reference implementation:
+
+- https://github.com/krittaprot/decision-roulette/blob/main/docs/guides/master_guide.md

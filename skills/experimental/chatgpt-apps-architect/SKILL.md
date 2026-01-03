@@ -13,6 +13,25 @@ Build production-grade ChatGPT Apps using the OpenAI Apps SDK and Model Context 
 **Examples Repository**: https://github.com/openai/openai-apps-sdk-examples
 **MCP Specification**: https://modelcontextprotocol.io/specification
 
+## Sunpeak Framework
+
+Sunpeak provides development tooling for ChatGPT Apps. Use it for:
+- **Local simulator**: `sunpeak dev` replicates the ChatGPT widget environment
+- **Build system**: `sunpeak build` bundles widgets
+- **UI utilities**: `useMaxHeight()` and `useSafeArea()` for responsive layouts
+
+Documentation:
+- https://docs.sunpeak.ai/quickstart
+- https://docs.sunpeak.ai/library/chatgpt-simulator
+- https://docs.sunpeak.ai/library/mcp-server
+- https://docs.sunpeak.ai/library/runtime-apis
+- https://docs.sunpeak.ai/template/project-scaffold
+- https://docs.sunpeak.ai/template/ui-components
+- https://docs.sunpeak.ai/guides/testing
+- https://docs.sunpeak.ai/guides/deployment
+
+Note: For complex interactive widgets, use the custom hook patterns in this skill (polling + grace period). Sunpeak's simpler hooks are fine for read-only widgets.
+
 ## Architecture Overview
 
 ChatGPT Apps have three components that must stay in sync:
@@ -143,7 +162,9 @@ server.registerResource(
 - `window.openai.sendFollowUpMessage({ prompt })` - Send user message
 - `window.openai.requestDisplayMode({ mode })` - Request fullscreen/PiP
 
-**React Hook Pattern:**
+**React Hook Pattern (read-only widgets):**
+Use this simpler pattern only when the widget does not accept user edits. For interactive widgets, use the polling + grace period hooks in `references/implementation-patterns.md`.
+
 ```typescript
 function useWidgetState<T>(initial: T | (() => T)) {
   const external = useOpenAiGlobal('widgetState') as T;
@@ -175,6 +196,50 @@ function useWidgetState<T>(initial: T | (() => T)) {
 
 **Key principle**: Widget state is scoped to a specific message. New messages = fresh widget state.
 
+## State Synchronization
+
+### The Problem
+When a widget accepts user edits and also receives server updates:
+1. User edits widget and local state updates immediately.
+2. The server responds with older data.
+3. The old data overwrites the user's edit.
+
+### The Solution: Grace Period Pattern
+After any local update, ignore external state changes for 2 seconds.
+
+```typescript
+const LOCAL_UPDATE_GRACE_PERIOD_MS = 2000;
+const lastLocalUpdateRef = useRef(0);
+
+// Before updating local state
+lastLocalUpdateRef.current = Date.now();
+
+// When receiving external state
+if (Date.now() - lastLocalUpdateRef.current < LOCAL_UPDATE_GRACE_PERIOD_MS) {
+  return; // Skip, user just made a local change
+}
+```
+
+### When to Use Each Pattern
+
+| Widget Type | Recommended Hooks | Reason |
+|:------------|:------------------|:-------|
+| Read-only display | Sunpeak `useWidgetGlobal` | Simpler, event-based. |
+| Interactive with edits | Polling + grace period | Prevents race conditions. |
+| Persistent state needed | Polling + localStorage | Survives page reloads. |
+
+### localStorage Fallback
+
+Use localStorage when state must persist across page reloads:
+
+```typescript
+const cached = localStorage.getItem(`app-state:${conversationId}`);
+const initial = widgetState ?? (cached ? JSON.parse(cached) : defaultState);
+
+window.openai.setWidgetState(newState);
+localStorage.setItem(`app-state:${conversationId}`, JSON.stringify(newState));
+```
+
 ## Deployment
 
 ### Local Development
@@ -202,6 +267,34 @@ Read these reference docs based on your needs:
 - **Widget UI guide**: https://developers.openai.com/apps-sdk/build/chatgpt-ui
 - **State management**: https://developers.openai.com/apps-sdk/build/state-management
 - **Authentication**: https://developers.openai.com/apps-sdk/build/auth
+- **Complete working example**: https://github.com/krittaprot/decision-roulette/blob/main/docs/guides/master_guide.md
+
+## Troubleshooting
+
+### Widget does not update after tool calls
+- Verify `structuredContent` is returned from the tool.
+- Confirm polling is running (500ms interval recommended).
+- Check that `window.openai.toolOutput` is being read.
+
+### UI edits revert after server response
+- Implement the grace period pattern (2 seconds).
+- Set `lastLocalUpdateRef.current = Date.now()` before any local edit.
+- Skip external state sync during the grace period.
+
+### State lost on page reload
+- Implement localStorage fallback with conversation-scoped keys.
+- Use `extractConversationId()` from URL/referrer for key suffix.
+- Restore from localStorage when `widgetState` is undefined.
+
+### Tool calls from widget don't persist state
+- Pass `clientKey` in tool arguments for Streamable HTTP.
+- Generate a stable clientKey per conversation (stored in localStorage).
+- Server should use clientKey to look up/persist state.
+
+### Server returns stale data
+- Implement fallback client key discovery on the server.
+- When no clientKey provided, find most recently active non-empty state.
+- Use Redis sorted sets to track activity timestamps.
 
 ## Checklist for New Apps
 
@@ -215,3 +308,6 @@ Read these reference docs based on your needs:
 8. [ ] Test in ChatGPT via ngrok tunnel
 9. [ ] Deploy to Cloud Run/Fly.io with HTTPS
 10. [ ] Configure Redis for multi-instance (if needed)
+11. [ ] Implement grace period for interactive widgets
+12. [ ] Add localStorage fallback if state must persist
+13. [ ] Pass clientKey for Streamable HTTP state continuity
