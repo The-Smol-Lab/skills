@@ -1,24 +1,9 @@
 {
   "skill_sources": [
     {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/ai-development",
-      "comment": "Curated AI development skills from this repo"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/software-engineering",
-      "comment": "Curated software engineering skills from this repo"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/utilities",
-      "comment": "Curated utility skills from this repo"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/experimental",
-      "comment": "Experimental skills that may change frequently"
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills/skills",
+      "comment": "All skills from this repo (local clone, recursive)"
     }
   ],
   "embedding_model": "all-MiniLM-L6-v2",
@@ -31,10 +16,10 @@
   "comment_max_image": "Maximum image file size (5MB). Larger images store URL only",
   "allowed_image_extensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"],
   "text_file_extensions": [".md", ".py", ".txt", ".json", ".yaml", ".yml", ".sh", ".r", ".ipynb", ".xml"],
-  "auto_update_enabled": true,
+  "auto_update_enabled": false,
   "comment_auto_update": "Enable automatic hourly skill updates (checks at :00 of each hour)",
   "auto_update_interval_minutes": 60,
   "comment_interval": "Check for updates every N minutes (synced to clockface hours)",
-  "github_api_token": "${GITHUB_TOKEN}",
-  "comment_token": "Set to ${GITHUB_TOKEN} or a literal token for 5000 req/hr; leave null to omit but expect 60 req/hr rate limits"
+  "github_api_token": null,
+  "comment_token": "Token is unused by the backend for GitHub sources right now; local clone avoids API rate limits"
 }

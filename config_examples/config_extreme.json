@@ -1,48 +1,48 @@
 {
   "skill_sources": [
     {
-      "type": "github",
-      "url": "https://github.com/anthropics/skills",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/anthropics/skills",
       "comment": "Official Anthropic skills - diverse examples with Python scripts, images, documents"
     },
     {
-      "type": "github",
-      "url": "https://github.com/ComposioHQ/awesome-claude-skills",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/ComposioHQ/awesome-claude-skills",
       "comment": "A curated list of awesome Claude Skills, resources, and tools for customizing Claude AI workflows"
     },
     {
-      "type": "github",
-      "url": "https://github.com/huggingface/skills",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/huggingface/skills",
       "comment": "huggingface related skills"
     },
     {
-      "type": "github",
-      "url": "https://github.com/mrgoonie/claudekit-skills",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/mrgoonie/claudekit-skills",
       "comment": "All powerful skills of ClaudeKit.cc!"
     },
     {
-      "type": "github",
-      "url": "https://github.com/obra/superpowers",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/obra/superpowers",
       "comment": "Claude Code superpowers: core skills library"
     },
     {
-      "type": "github",
-      "url": "https://github.com/wshobson/agents/tree/main/plugins/kubernetes-operations/skills",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/wshobson/agents/plugins/kubernetes-operations/skills",
       "comment": "K8s deployment, monitoring, troubleshooting"
     },
     {
-      "type": "github",
-      "url": "https://github.com/openai/skills/tree/main/skills/.curated",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/openai/skills/skills/.curated",
       "comment": "Curated Skills for Codex"
     },
     {
-      "type": "github",
-      "url": "https://github.com/alirezarezvani/claude-skills/tree/main/engineering-team",
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/alirezarezvani/claude-skills/engineering-team",
       "comment": "Full Engineering Team"
     },
     {
       "type": "local",
-      "path": "~/.claude/skills",
+      "path": "~/.config/opencode/claude-skills-mcp/skills-sources/local",
       "comment": "Your custom local skills (optional - directory doesn't need to exist)"
     }
   ],
@@ -56,10 +56,10 @@
   "comment_max_image": "Maximum image file size (5MB). Larger images store URL only",
   "allowed_image_extensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"],
   "text_file_extensions": [".md", ".py", ".txt", ".json", ".yaml", ".yml", ".sh", ".r", ".ipynb", ".xml"],
-  "auto_update_enabled": true,
+  "auto_update_enabled": false,
   "comment_auto_update": "Enable automatic hourly skill updates (checks at :00 of each hour)",
   "auto_update_interval_minutes": 60,
   "comment_interval": "Check for updates every N minutes (synced to clockface hours)",
-  "github_api_token": "${GITHUB_TOKEN}",
-  "comment_token": "Set to ${GITHUB_TOKEN} or a literal token for 5000 req/hr; leave null to omit but expect 60 req/hr rate limits"
+  "github_api_token": null,
+  "comment_token": "Token is unused by the backend for GitHub sources right now; local clone avoids API rate limits"
 }

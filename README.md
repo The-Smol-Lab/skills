@@ -22,7 +22,12 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
 
 1. **Clone this repository** to a clean, isolated folder:
 
-   `~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills`
+```bash
+mkdir -p "~/.config/opencode/claude-skills-mcp"
+git clone https://github.com/The-Smol-Lab/skills "~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills"
+```
+
+   Optional: if you want to keep multiple skill repos together, clone them under one folder (see "Mass clone" below).
 
 2. **Add the MCP server** to your OpenCode config (`~/.config/opencode/opencode.json` or a per-project `opencode.json`):
 
@@ -69,6 +74,9 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
 }
 ```
 
+   - A local-only starter config is available at [`config_examples/config.json`](config_examples/config.json)
+   - A multi-repo local config is available at [`config_examples/config_extreme.json`](config_examples/config_extreme.json)
+
 4. **Why local + manual updates?**
 
    The current `claude-skills-mcp-backend` version does not pass `github_api_token` into GitHub API requests, which can trigger rate limits when loading skills from GitHub. Using a local clone avoids the API entirely. Update manually when you want the latest skills:
@@ -77,7 +85,42 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
 git -C "~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills" pull --ff-only
 ```
 
-5. **Restart OpenCode** and use skills in your prompts
+5. **Mass clone (optional)**
+
+   If you want to load multiple skill repos locally, keep them under one folder and point your config at each repo's `skills` directory:
+
+```bash
+mkdir -p "~/.config/opencode/claude-skills-mcp/skills-sources"
+
+git clone https://github.com/anthropics/skills "~/.config/opencode/claude-skills-mcp/skills-sources/anthropics/skills"
+git clone https://github.com/ComposioHQ/awesome-claude-skills "~/.config/opencode/claude-skills-mcp/skills-sources/ComposioHQ/awesome-claude-skills"
+git clone https://github.com/huggingface/skills "~/.config/opencode/claude-skills-mcp/skills-sources/huggingface/skills"
+git clone https://github.com/mrgoonie/claudekit-skills "~/.config/opencode/claude-skills-mcp/skills-sources/mrgoonie/claudekit-skills"
+git clone https://github.com/obra/superpowers "~/.config/opencode/claude-skills-mcp/skills-sources/obra/superpowers"
+git clone https://github.com/wshobson/agents "~/.config/opencode/claude-skills-mcp/skills-sources/wshobson/agents"
+git clone https://github.com/openai/skills "~/.config/opencode/claude-skills-mcp/skills-sources/openai/skills"
+git clone https://github.com/alirezarezvani/claude-skills "~/.config/opencode/claude-skills-mcp/skills-sources/alirezarezvani/claude-skills"
+```
+
+6. **Mass update (optional)**
+
+   Pull the latest changes for every cloned repo:
+
+```bash
+for dir in "~/.config/opencode/claude-skills-mcp/skills-sources"/*/*; do
+  if [ -d "$dir/.git" ]; then
+    git -C "$dir" pull --ff-only
+  fi
+done
+```
+
+   One-liner version:
+
+```bash
+for dir in "~/.config/opencode/claude-skills-mcp/skills-sources"/*/*; do [ -d "$dir/.git" ] && git -C "$dir" pull --ff-only; done
+```
+
+7. **Restart OpenCode** and use skills in your prompts
 
    Example: _"Use the `skill-creator` skill. Follow it step by step."_
 
