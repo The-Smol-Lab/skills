@@ -35,6 +35,6 @@
   "comment_auto_update": "Enable automatic hourly skill updates (checks at :00 of each hour)",
   "auto_update_interval_minutes": 60,
   "comment_interval": "Check for updates every N minutes (synced to clockface hours)",
-  "github_api_token": null,
-  "comment_token": "Optional GitHub personal access token for 5000 req/hr (default: 60 req/hr)"
+  "github_api_token": "${GITHUB_TOKEN}",
+  "comment_token": "Set to ${GITHUB_TOKEN} or a literal token for 5000 req/hr; leave null to omit but expect 60 req/hr rate limits"
 }
