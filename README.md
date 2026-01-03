@@ -82,7 +82,7 @@ git clone https://github.com/The-Smol-Lab/skills "~/.config/opencode/claude-skil
    The current `claude-skills-mcp-backend` version does not pass `github_api_token` into GitHub API requests, which can trigger rate limits when loading skills from GitHub. Using a local clone avoids the API entirely. Update manually when you want the latest skills:
 
 ```bash
-git -C "~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills" pull --ff-only
+git -C ~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills pull --ff-only
 ```
 
 5. **Mass clone (optional)**
@@ -107,7 +107,7 @@ git clone https://github.com/alirezarezvani/claude-skills "~/.config/opencode/cl
    Pull the latest changes for every cloned repo:
 
 ```bash
-for dir in "~/.config/opencode/claude-skills-mcp/skills-sources"/*/*; do
+for dir in ~/.config/opencode/claude-skills-mcp/skills-sources/*/*; do
   if [ -d "$dir/.git" ]; then
     git -C "$dir" pull --ff-only
   fi
@@ -117,7 +117,7 @@ done
    One-liner version:
 
 ```bash
-for dir in "~/.config/opencode/claude-skills-mcp/skills-sources"/*/*; do [ -d "$dir/.git" ] && git -C "$dir" pull --ff-only; done
+for dir in ~/.config/opencode/claude-skills-mcp/skills-sources/*/*; do [ -d "$dir/.git" ] && git -C "$dir" pull --ff-only; done
 ```
 
 7. **Restart OpenCode** and use skills in your prompts
