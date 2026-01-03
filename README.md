@@ -28,36 +28,34 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
 }
 ```
 
-3. Generate a starter config and then edit it to point at this repo:
-
-```bash
-uvx claude-skills-mcp --example-config > ~/.claude/skills/config.json
-```
-
-4. Update `~/.claude/skills/config.json` to use only these skill sources:
+3. Generate a starter config here `~/.claude/skills/config.json` and copy the content below:
 
 ```jsonc
 {
   "skill_sources": [
     {
       "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/ai-development"
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/ai-development",
+      "comment": "Curated AI development skills from this repo"
     },
     {
       "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/software-engineering"
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/software-engineering",
+      "comment": "Curated software engineering skills from this repo"
     },
     {
       "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/utilities"
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/utilities",
+      "comment": "Curated utility skills from this repo"
     },
     {
       "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/experimental"
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/experimental",
+      "comment": "Experimental skills that may change frequently"
     }
   ],
   "embedding_model": "all-MiniLM-L6-v2",
-  "default_top_k": 3,
+  "default_top_k": 5,
   "max_skill_content_chars": null,
   "comment_max_chars": "Set to an integer (e.g., 5000) to truncate skill content, or null for unlimited",
   "load_skill_documents": true,
