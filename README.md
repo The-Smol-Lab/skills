@@ -20,20 +20,15 @@ OpenCode can access this repo through an MCP server. The simplest option is to e
 ```jsonc
 {
   "mcp": {
-    "smol_skills": {
+    "claude-skills": {
       "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/absolute/path/to/the-smol-lab/skills/skills"
-      ]
+      "command": ["uvx", "claude-skills-mcp", "--config", "~/.claude/skills/config.json"]
     }
   }
 }
 ```
 
-3. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill at `skills/curated/utilities/skill-creator/SKILL.md`. Follow it step by step.”).
+3. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill. Follow it step by step.”).
 
 ## Contributing
 - Add new skills under the appropriate category.
