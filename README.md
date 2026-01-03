@@ -12,7 +12,7 @@ A curated library of reusable "skills" for coding agents. Each skill bundles gui
 3. Use any referenced docs or scripts to complete the task.
 
 ## Using with OpenCode (MCP)
-OpenCode can access this repo through an MCP server. The simplest option is to expose the `skills/` folder via the filesystem MCP server.
+OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https://github.com/K-Dense-AI/claude-skills-mcp) server, which provides semantic search and progressive disclosure for skills.
 
 1. Clone this repo somewhere on your machine.
 2. Add an MCP server to your OpenCode config (`~/.config/opencode/opencode.json` or a per-project `opencode.json`):
@@ -28,7 +28,13 @@ OpenCode can access this repo through an MCP server. The simplest option is to e
 }
 ```
 
-3. Set up your `~/.claude/skills/config.json` with the curated skill sources:
+3. Generate a starter config and then edit it to point at this repo:
+
+```bash
+uvx claude-skills-mcp --example-config > ~/.claude/skills/config.json
+```
+
+4. Update `~/.claude/skills/config.json` to use only these skill sources:
 
 ```jsonc
 {
@@ -51,7 +57,7 @@ OpenCode can access this repo through an MCP server. The simplest option is to e
     }
   ],
   "embedding_model": "all-MiniLM-L6-v2",
-  "default_top_k": 10,
+  "default_top_k": 3,
   "max_skill_content_chars": null,
   "comment_max_chars": "Set to an integer (e.g., 5000) to truncate skill content, or null for unlimited",
   "load_skill_documents": true,
@@ -69,7 +75,7 @@ OpenCode can access this repo through an MCP server. The simplest option is to e
 }
 ```
 
-4. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill. Follow it step by step.”).
+5. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill. Follow it step by step.”).
 
 ## Contributing
 - Add new skills under the appropriate category.
