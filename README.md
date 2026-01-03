@@ -28,7 +28,48 @@ OpenCode can access this repo through an MCP server. The simplest option is to e
 }
 ```
 
-3. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill. Follow it step by step.”).
+3. Set up your `~/.claude/skills/config.json` with the curated skill sources:
+
+```jsonc
+{
+  "skill_sources": [
+    {
+      "type": "github",
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/ai-development"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/software-engineering"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/utilities"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/experimental"
+    }
+  ],
+  "embedding_model": "all-MiniLM-L6-v2",
+  "default_top_k": 10,
+  "max_skill_content_chars": null,
+  "comment_max_chars": "Set to an integer (e.g., 5000) to truncate skill content, or null for unlimited",
+  "load_skill_documents": true,
+  "comment_load_docs": "Load additional files (scripts, references, assets) from skill directories",
+  "max_image_size_bytes": 5242880,
+  "comment_max_image": "Maximum image file size (5MB). Larger images store URL only",
+  "allowed_image_extensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"],
+  "text_file_extensions": [".md", ".py", ".txt", ".json", ".yaml", ".yml", ".sh", ".r", ".ipynb", ".xml"],
+  "auto_update_enabled": true,
+  "comment_auto_update": "Enable automatic hourly skill updates (checks at :00 of each hour)",
+  "auto_update_interval_minutes": 60,
+  "comment_interval": "Check for updates every N minutes (synced to clockface hours)",
+  "github_api_token": null,
+  "comment_token": "Optional GitHub personal access token for 5000 req/hr (default: 60 req/hr)"
+}
+```
+
+4. Restart OpenCode. In prompts, ask it to read and follow a specific skill (for example: “Use the `skill-creator` skill. Follow it step by step.”).
 
 ## Contributing
 - Add new skills under the appropriate category.
