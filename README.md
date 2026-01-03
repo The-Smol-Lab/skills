@@ -17,4 +17,4 @@ A curated library of reusable "skills" for coding agents. Each skill bundles gui
 - Prefer links to authoritative references and include runnable scripts where helpful.
 
 ## License
-MIT
+MIT — see [LICENSE](LICENSE).
