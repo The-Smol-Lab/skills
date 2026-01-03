@@ -1,4 +1,4 @@
-# skills
+# Skills Catalog
 A curated library of reusable "skills" for coding agents. Each skill bundles guidance, references, and optionally scripts so agents can execute domain-specific tasks consistently.
 
 ## What’s in this repo
