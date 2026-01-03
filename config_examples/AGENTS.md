@@ -18,12 +18,13 @@
 
 ### Code generation and review
 
+* For any coding task that needs documentation reference, use **Context7** to look up current library/framework docs before planning or implementing.
 * When generating or reviewing Python code, use **Context7** to reference current Python and library documentation, syntax, and best practices.
 * When generating or reviewing frontend code, use **Context7** to reference current frontend framework and library documentation, syntax, and best practices.
 
 ### Tooling support
 
-* Use **claude-skills** tools to discover relevant skills when asked to perform specialized or unfamiliar tasks.
+* Use **claude-skills** tools to discover specialized skills/workflows for unfamiliar or domain-specific tasks.
 * Follow progressive disclosure to keep context small and responses fast:
   * Start with `find_helpful_skills` for any domain-specific task; use a detailed `task_description`.
   * Only use `list_skills` for inventory/debugging or to verify configuration; avoid it for task queries.
