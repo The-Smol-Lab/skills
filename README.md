@@ -15,3 +15,6 @@ A curated library of reusable "skills" for coding agents. Each skill bundles gui
 - Add new skills under the appropriate category.
 - Keep skills self-contained and focused on a single domain or workflow.
 - Prefer links to authoritative references and include runnable scripts where helpful.
+
+## License
+MIT
