@@ -29,7 +29,7 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
 ```
 See opencode doc here for mcp official mcp config: [https://opencode.ai/docs/mcp-servers/](https://opencode.ai/docs/mcp-servers/)
 
-3. Generate a starter config here `~/.claude/skills/config.json` and copy the content below (also available at https://github.com/The-Smol-Lab/skills/tree/main/config_examples). For a heavier setup that loads 100+ skills at once, see `config_examples/config_extreme.json`—the claude-skills-mcp server still uses semantic search to select the right skills on demand.
+3. Generate a starter config here `~/.claude/skills/config.json` and copy the content below (also available at https://github.com/The-Smol-Lab/skills/tree/main/config_examples). For a heavier setup that loads 100+ skills at once, see `config_examples/config_extreme.json`—the claude-skills-mcp server still uses semantic search to select the right skills on demand. For a walkthrough on creating a GitHub token, see https://docs.catalyst.zoho.com/en/tutorials/githubbot/java/generate-personal-access-token/. For public repos, a classic PAT with read-only access is sufficient.
 
 ```jsonc
 {
