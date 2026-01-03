@@ -20,7 +20,9 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
 
 ### Setup Instructions
 
-1. **Clone this repository** somewhere on your machine
+1. **Clone this repository** to a clean, isolated folder:
+
+   `~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills`
 
 2. **Add the MCP server** to your OpenCode config (`~/.config/opencode/opencode.json` or a per-project `opencode.json`):
 
@@ -29,7 +31,7 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
   "mcp": {
     "claude-skills": {
       "type": "local",
-      "command": ["uvx", "claude-skills-mcp", "--config", "~/.claude/skills/config.json"]
+      "command": ["uvx", "claude-skills-mcp", "--config", "~/.config/opencode/claude-skills-mcp/config.json"]
     }
   }
 }
@@ -37,35 +39,15 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
 
    See the [official OpenCode MCP documentation](https://opencode.ai/docs/mcp-servers/) for more details.
 
-3. **Create the skills config** at `~/.claude/skills/config.json` and copy the content below:
-
-   - A starter config is available at [`config_examples/config.json`](config_examples/config.json)
-   - For a heavier setup loading 100+ skills, see [`config_examples/config_extreme.json`](config_examples/config_extreme.json)
-   - For creating a GitHub token, see [this guide](https://docs.catalyst.zoho.com/en/tutorials/githubbot/java/generate-personal-access-token/)
-   - For public repos, a classic PAT with read-only access is sufficient
+3. **Create the skills config** at `~/.config/opencode/claude-skills-mcp/config.json` and copy the content below:
 
 ```jsonc
 {
   "skill_sources": [
     {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/ai-development",
-      "comment": "Curated AI development skills from this repo"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/software-engineering",
-      "comment": "Curated software engineering skills from this repo"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/curated/utilities",
-      "comment": "Curated utility skills from this repo"
-    },
-    {
-      "type": "github",
-      "url": "https://github.com/The-Smol-Lab/skills/tree/main/skills/experimental",
-      "comment": "Experimental skills that may change frequently"
+      "type": "local",
+      "path": "~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills/skills",
+      "comment": "All skills from this repo (local clone, recursive)"
     }
   ],
   "embedding_model": "all-MiniLM-L6-v2",
@@ -78,16 +60,24 @@ OpenCode can access this repo through the [K-Dense AI claude-skills-mcp](https:/
   "comment_max_image": "Maximum image file size (5MB). Larger images store URL only",
   "allowed_image_extensions": [".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"],
   "text_file_extensions": [".md", ".py", ".txt", ".json", ".yaml", ".yml", ".sh", ".r", ".ipynb", ".xml"],
-  "auto_update_enabled": true,
+  "auto_update_enabled": false,
   "comment_auto_update": "Enable automatic hourly skill updates (checks at :00 of each hour)",
   "auto_update_interval_minutes": 60,
   "comment_interval": "Check for updates every N minutes (synced to clockface hours)",
-  "github_api_token": "${GITHUB_TOKEN}",
-  "comment_token": "Set to ${GITHUB_TOKEN} or a literal token for 5000 req/hr; leave null to omit but expect 60 req/hr rate limits"
+  "github_api_token": null,
+  "comment_token": "Token is unused by the backend for GitHub sources right now; local clone avoids API rate limits"
 }
 ```
 
-4. **Restart OpenCode** and use skills in your prompts
+4. **Why local + manual updates?**
+
+   The current `claude-skills-mcp-backend` version does not pass `github_api_token` into GitHub API requests, which can trigger rate limits when loading skills from GitHub. Using a local clone avoids the API entirely. Update manually when you want the latest skills:
+
+```bash
+git -C "~/.config/opencode/claude-skills-mcp/The-Smol-Lab-skills" pull --ff-only
+```
+
+5. **Restart OpenCode** and use skills in your prompts
 
    Example: _"Use the `skill-creator` skill. Follow it step by step."_
 
