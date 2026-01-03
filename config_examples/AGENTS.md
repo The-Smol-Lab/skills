@@ -19,6 +19,7 @@
 ### Code generation and review
 
 * For any coding task that needs documentation reference, use **Context7** to look up current library/framework docs before planning or implementing.
+* When asked about newer frameworks, emerging technologies, or recent updates to existing tech stacks, use **web search** tools to gather up-to-date information before planning or implementing. This ensures access to the latest information that may not yet be available in Context7 or training data.
 * When generating or reviewing Python code, use **Context7** to reference current Python and library documentation, syntax, and best practices.
 * When generating or reviewing frontend code, use **Context7** to reference current frontend framework and library documentation, syntax, and best practices.
 
