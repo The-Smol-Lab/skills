@@ -16,13 +16,15 @@ competitor analysis, transcript insights, and trend validation.
 ## Quick start
 
 1. Run `scripts/setup_check.py` to create a local `.venv` and verify tools.
-2. Use `./run.sh <script.py>` or `uv run <script.py>` to execute scripts.
-3. Ask for the user's idea(s), target audience, and goals.
-4. Use `scripts/youtube_search.py` to gather top videos per keyword.
-5. Use `scripts/trends_analyzer.py` to validate trend momentum.
-6. Use MCP transcripts for top competitors and summarize with
+2. Confirm the MCP server is available: `opencode mcp list` should show
+   `youtube_transcript` connected.
+3. Use `./run.sh <script.py>` or `uv run <script.py>` to execute scripts.
+4. Ask for the user's idea(s), target audience, and goals.
+5. Use `scripts/youtube_search.py` to gather top videos per keyword.
+6. Use `scripts/trends_analyzer.py` to validate trend momentum.
+7. Use MCP transcripts for top competitors and summarize with
    `scripts/transcript_analyzer.py`.
-7. Produce a structured strategy report, then iterate conversationally.
+8. Produce a structured strategy report, then iterate conversationally.
 
 ## Core workflow
 
